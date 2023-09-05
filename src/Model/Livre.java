@@ -1,6 +1,7 @@
 package Model;
 
 public class Livre {
+    private int id;
     private String titre;
     private String auteur;
     private String isbn;
@@ -15,6 +16,13 @@ public class Livre {
     }
 
     // Getters et setters
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
     public String getTitre() {
         return titre;
     }

@@ -1,8 +1,6 @@
 package Connection;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public final class Connected {
     private static final String DB_NAME = "bibliotech";

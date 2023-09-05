@@ -1,9 +1,8 @@
 package Controller;
 
 import Model.Livre;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+
+import java.sql.*;
 
 public class LivreController {
     private Connection connection;
@@ -11,10 +10,10 @@ public class LivreController {
         this.connection = connection;
     }
 
-    public boolean ajouterLivre(Livre livre) {
+    public int ajouterLivre(Livre livre) {
         try {
-            String insertQuery = "INSERT INTO livre (titre, auteur, isbn, quantite) VALUES (?, ?, ?, ?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+            String insertQuery = "INSERT INTO Livre (titre, auteur, isbn, quantite) VALUES (?, ?, ?, ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, livre.getTitre());
             preparedStatement.setString(2, livre.getAuteur());
             preparedStatement.setString(3, livre.getIsbn());
@@ -22,17 +21,20 @@ public class LivreController {
 
             int rowCount = preparedStatement.executeUpdate();
 
-            preparedStatement.close();
-
-            return rowCount > 0;
-        } catch (SQLException e) {
-            if (e.getSQLState().equals("23000")) {
-                // Code d'erreur "23000" correspondant à une violation de contrainte UNIQUE
-                System.out.println("ISBN existe déjà dans la base de données.");
-            } else {
-                System.out.println("Erreur lors de l'ajout du livre : " + e.getMessage());
+            // Récupérez l'ID généré après l'insertion
+            if (rowCount > 0) {
+                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1); // ID du livre inséré
+                }
             }
-            return false;
+
+            preparedStatement.close();
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de l'ajout du livre : " + e.getMessage());
         }
+
+        return -1;
     }
+
 }
