@@ -29,7 +29,7 @@ public class Bibliotech {
                     ajouterLivre(connection, scanner);
                     break;
                 case 2:
-                    afficherLivres(connection);
+                    afficherLivres(connection, scanner);
                     break;
                 case 3:
                     chercherLivre(connection, scanner);
@@ -52,8 +52,6 @@ public class Bibliotech {
 
     private static void ajouterLivre(Connection connection, Scanner scanner) {
         while (true) {
-
-
             System.out.println("Ajout d'un nouveau livre à la bibliothèque.");
             System.out.print("Titre du livre : ");
             String titre = scanner.nextLine();
@@ -75,7 +73,7 @@ public class Bibliotech {
                 CopieLivreController copieLivreController = new CopieLivreController(connection);
 
                 for (int i = 0; i < quantite; i++) {
-                    copieLivreController.ajouterCopie(livreAjoute.getId(), true);
+                    copieLivreController.ajouterCopie(livreAjoute.getId(), "Disponible");
                 }
 
                 System.out.println("Les copies ont été ajoutées avec succès.");
@@ -109,8 +107,27 @@ public class Bibliotech {
 
 
 
-    private static void afficherLivres(Connection connection) {
-        // Implémentez l'affichage des livres ici
+    private static void afficherLivres(Connection connection, Scanner scanner) {
+        LivreController livreController = new LivreController(connection);
+        livreController.afficherLivres();
+
+        System.out.println("Que souhaitez-vous faire ?");
+        System.out.println("1. Revenir au menu");
+        System.out.println("0. Quitter");
+        System.out.print("Choix : ");
+        int choix = Integer.parseInt(scanner.nextLine());
+
+        switch (choix) {
+            case 1:
+                // Revenir au menu principal
+                return;
+            case 0:
+                // Quitter le programme
+                System.out.println("Merci d'avoir utilisé BiblioTech. Au revoir !");
+                System.exit(0);
+            default:
+                System.out.println("Option invalide. Revenez au menu principal.");
+        }
     }
 
     private static void chercherLivre(Connection connection, Scanner scanner) {

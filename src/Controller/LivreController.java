@@ -44,4 +44,45 @@ public class LivreController {
         return livreAjouter;
     }
 
+    public void afficherLivres() {
+        try {
+            String query = "SELECT titre, auteur, " +
+                    "SUM(CASE WHEN statut = 'disponible' THEN 1 ELSE 0 END) AS quantite_disponible, " +
+                    "SUM(CASE WHEN statut = 'emprunté' THEN 1 ELSE 0 END) AS quantite_emprunte, " +
+                    "SUM(CASE WHEN statut = 'perdu' THEN 1 ELSE 0 END) AS quantite_perdu " +
+                    "FROM livre " +
+                    "LEFT JOIN copie ON livre.id = copie.livre_id " +
+                    "GROUP BY titre, auteur";
+
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+
+            System.out.println("Statistiques des livres :");
+            System.out.println("-------------------------------------------------------------");
+            System.out.printf("%-20s %-20s %-5s %-5s %-5s%n",
+                    "Titre", "Auteur", "Quantité Disponible", "Quantité Empruntée", "Quantité Perdue");
+            System.out.println("-------------------------------------------------------------");
+
+            while (resultSet.next()) {
+                String titre = resultSet.getString("titre");
+                String auteur = resultSet.getString("auteur");
+                int quantiteDisponible = resultSet.getInt("quantite_disponible");
+                int quantiteEmprunte = resultSet.getInt("quantite_emprunte");
+                int quantitePerdu = resultSet.getInt("quantite_perdu");
+
+                System.out.printf("%-20s %-20s %-5d %-5d %-5d%n",
+                        titre, auteur, quantiteDisponible, quantiteEmprunte, quantitePerdu);
+            }
+
+            System.out.println("-------------------------------------------------------------");
+
+            resultSet.close();
+            statement.close();
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de l'affichage des statistiques : " + e.getMessage());
+        }
+    }
+
+
+
 }

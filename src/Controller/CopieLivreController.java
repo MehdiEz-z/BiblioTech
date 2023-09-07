@@ -10,12 +10,12 @@ public class CopieLivreController {
         this.connection = connection;
     }
 
-    public boolean ajouterCopie(int livreId, boolean statut) {
+    public boolean ajouterCopie(int livreId, String statut) {
         try {
             String insertQuery = "INSERT INTO copie (livre_id, statut) VALUES (?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
             preparedStatement.setInt(1, livreId);
-            preparedStatement.setBoolean(2, statut);
+            preparedStatement.setString(2, statut);
 
             int rowCount = preparedStatement.executeUpdate();
 
