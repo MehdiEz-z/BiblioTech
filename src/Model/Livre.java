@@ -7,7 +7,6 @@ public class Livre {
     private String isbn;
     private int quantite;
 
-    // Constructeur
     public Livre(String titre, String auteur, String isbn, int quantite) {
         this.titre = titre;
         this.auteur = auteur;

@@ -10,7 +10,9 @@ public class LivreController {
         this.connection = connection;
     }
 
-    public int ajouterLivre(Livre livre) {
+    public Livre ajouterLivre(Livre livre) {
+
+        Livre livreAjouter = null;
         try {
             String insertQuery = "INSERT INTO Livre (titre, auteur, isbn, quantite) VALUES (?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);
@@ -21,20 +23,25 @@ public class LivreController {
 
             int rowCount = preparedStatement.executeUpdate();
 
-            // Récupérez l'ID généré après l'insertion
             if (rowCount > 0) {
                 ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
                 if (generatedKeys.next()) {
-                    return generatedKeys.getInt(1); // ID du livre inséré
+                    int id = generatedKeys.getInt(1); // Récupérez l'ID généré
+                    livreAjouter = livre;
+                    livreAjouter.setId(id);
                 }
             }
 
             preparedStatement.close();
         } catch (SQLException e) {
-            System.out.println("Erreur lors de l'ajout du livre : " + e.getMessage());
+            if (e.getSQLState().equals("23000")) {
+                // Code d'erreur "23000" correspondant à une violation de contrainte UNIQUE
+                System.out.println("Cet ISBN existe déjà.");
+            } else {
+                System.out.println("Erreur lors de l'ajout du livre : " + e.getMessage());
+            }
         }
-
-        return -1;
+        return livreAjouter;
     }
 
 }
