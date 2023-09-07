@@ -5,6 +5,7 @@ import Model.Livre;
 
 import java.sql.Connection;
 import java.util.Scanner;
+import java.util.List;
 
 public class Bibliotech {
     public static void main(String[] args) {
@@ -105,8 +106,6 @@ public class Bibliotech {
         }
     }
 
-
-
     private static void afficherLivres(Connection connection, Scanner scanner) {
         LivreController livreController = new LivreController(connection);
         livreController.afficherLivres();
@@ -131,7 +130,49 @@ public class Bibliotech {
     }
 
     private static void chercherLivre(Connection connection, Scanner scanner) {
-        // Implémentez la recherche de livre ici
+        while (true) {
+            System.out.print("Rechercher un livre par titre ou auteur : ");
+            String recherche = scanner.nextLine();
+
+            LivreController livreController = new LivreController(connection);
+            List<Livre> resultats = livreController.rechercherLivres(recherche);
+
+            if (resultats.isEmpty()) {
+                System.out.println("Aucun livre trouvé pour la recherche : " + recherche);
+            } else {
+                System.out.println("Livres trouvés pour la recherche :");
+                for (Livre livre : resultats) {
+                    System.out.println("Titre : " + livre.getTitre());
+                    System.out.println("Auteur : " + livre.getAuteur());
+                    System.out.println("ISBN : " + livre.getIsbn());
+                    System.out.println("Quantité : " + livre.getQuantite());
+                    System.out.println("Copies disponibles : " + livre.getQuantiteCopiesDispo());
+                    System.out.println();
+                }
+            }
+
+            System.out.println("Que souhaitez-vous faire ?");
+            System.out.println("1. Rechercher un livre");
+            System.out.println("2. Revenir au menu");
+            System.out.println("0. Quitter");
+            System.out.print("Choix : ");
+            int choix = Integer.parseInt(scanner.nextLine());
+
+            switch (choix) {
+                case 1:
+                    // Rechercher un livre (continue la boucle)
+                    break;
+                case 2:
+                    // Revenir au menu principal
+                    return;
+                case 0:
+                    // Quitter le programme
+                    System.out.println("Merci d'avoir utilisé BiblioTech. Au revoir !");
+                    System.exit(0);
+                default:
+                    System.out.println("Option invalide. Revenez au menu principal.");
+            }
+        }
     }
 
     private static void emprunterLivre(Connection connection, Scanner scanner) {

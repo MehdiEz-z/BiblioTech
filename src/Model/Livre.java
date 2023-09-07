@@ -7,11 +7,14 @@ public class Livre {
     private String isbn;
     private int quantite;
 
+    private int quantiteCopiesDispo;
+
     public Livre(String titre, String auteur, String isbn, int quantite) {
         this.titre = titre;
         this.auteur = auteur;
         this.isbn = isbn;
         this.quantite = quantite;
+        this.quantiteCopiesDispo = 0;
     }
 
     // Getters et setters
@@ -53,5 +56,9 @@ public class Livre {
     public void setQuantite(int quantite) {
         this.quantite = quantite;
     }
+
+    public int getQuantiteCopiesDispo() { return quantiteCopiesDispo; }
+
+    public void setQuantiteCopiesDispo(int quantiteCopiesDispo) { this.quantiteCopiesDispo = quantiteCopiesDispo; }
 }
 

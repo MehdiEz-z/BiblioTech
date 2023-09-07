@@ -3,6 +3,8 @@ package Controller;
 import Model.Livre;
 
 import java.sql.*;
+import java.util.List;
+import java.util.ArrayList;
 
 public class LivreController {
     private Connection connection;
@@ -83,6 +85,43 @@ public class LivreController {
         }
     }
 
+    public List<Livre> rechercherLivres(String recherche) {
+        List<Livre> resultats = new ArrayList<>();
 
+        try {
+            String query = "SELECT l.titre, l.auteur, l.isbn, l.quantite, " +
+                    "COUNT(c.id) AS quantite_copies_dispo " +
+                    "FROM livre AS l " +
+                    "LEFT JOIN copie AS c ON l.id = c.livre_id " +
+                    "WHERE l.titre LIKE ? OR l.auteur LIKE ? " +
+                    "AND (c.statut IS NULL OR c.statut = ?) " +
+                    "GROUP BY l.id, l.titre, l.auteur, l.isbn, l.quantite";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, "%" + recherche + "%"); // Recherche dans le titre
+            preparedStatement.setString(2, "%" + recherche + "%"); // Recherche dans l'auteur
+            preparedStatement.setBoolean(3, true); // Copies disponibles
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                String titre = resultSet.getString("titre");
+                String auteur = resultSet.getString("auteur");
+                String isbn = resultSet.getString("isbn");
+                int quantite = resultSet.getInt("quantite");
+                int quantiteCopiesDispo = resultSet.getInt("quantite_copies_dispo");
+
+                Livre livre = new Livre(titre, auteur, isbn, quantite);
+                livre.setQuantiteCopiesDispo(quantiteCopiesDispo);
+                resultats.add(livre);
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la recherche de livres : " + e.getMessage());
+        }
+
+        return resultats;
+    }
 
 }
