@@ -79,8 +79,6 @@ public class Bibliotech {
 
                 System.out.println("Les copies ont été ajoutées avec succès.");
 
-                // Demande à l'utilisateur s'il veut réajouter un livre, revenir au menu ou quitter
-
                 System.out.println("Que souhaitez-vous faire ?");
                 System.out.println("1. Réajouter un livre");
                 System.out.println("2. Revenir au menu");
@@ -131,36 +129,150 @@ public class Bibliotech {
 
     private static void chercherLivre(Connection connection, Scanner scanner) {
         while (true) {
-            System.out.print("Rechercher un livre par titre ou auteur : ");
-            String recherche = scanner.nextLine();
+            System.out.println("Choisissez un type de recherche :");
+            System.out.println("1. Rechercher par titre ou auteur");
+            System.out.println("2. Rechercher par ISBN");
+            System.out.println("0. Revenir au menu principal");
+            System.out.print("Choix : ");
 
-            LivreController livreController = new LivreController(connection);
-            List<Livre> resultats = livreController.rechercherLivres(recherche);
+            int choixRecherche = Integer.parseInt(scanner.nextLine());
 
-            if (resultats.isEmpty()) {
-                System.out.println("Aucun livre trouvé pour la recherche : " + recherche);
-            } else {
-                System.out.println("Livres trouvés pour la recherche :");
-                for (Livre livre : resultats) {
-                    System.out.println("Titre : " + livre.getTitre());
-                    System.out.println("Auteur : " + livre.getAuteur());
-                    System.out.println("ISBN : " + livre.getIsbn());
-                    System.out.println("Quantité : " + livre.getQuantite());
-                    System.out.println("Copies disponibles : " + livre.getQuantiteCopiesDispo());
-                    System.out.println();
-                }
+            switch (choixRecherche) {
+                case 1:
+                    rechercherParTitreAuteur(connection, scanner);
+                    break;
+                case 2:
+                    rechercherParISBN(connection, scanner);
+                    break;
+                case 0:
+                    // Revenir au menu principal
+                    return;
+                default:
+                    System.out.println("Option invalide. Veuillez choisir une option valide.");
             }
+        }
+    }
+
+    private static void rechercherParTitreAuteur(Connection connection, Scanner scanner) {
+        System.out.print("Entrer le titre ou le nom d'auteur : ");
+        String recherche = scanner.nextLine();
+
+        LivreController livreController = new LivreController(connection);
+        List<Livre> resultats = livreController.rechercherLivres(recherche);
+
+        if (resultats.isEmpty()) {
+            System.out.println("Aucun livre trouvé pour la recherche : " + recherche);
+        } else {
+            System.out.println("Livres trouvés pour la recherche :");
+            for (Livre livre : resultats) {
+                System.out.println("Titre : " + livre.getTitre());
+                System.out.println("Auteur : " + livre.getAuteur());
+                System.out.println("ISBN : " + livre.getIsbn());
+                System.out.println("Quantité : " + livre.getQuantite());
+                System.out.println("Copies disponibles : " + livre.getQuantiteCopiesDispo());
+                System.out.println();
+            }
+        }
+
+        System.out.println("Que souhaitez-vous faire ?");
+        System.out.println("1. Nouvelle recherche");
+        System.out.println("2. Revenir au menu principal");
+        System.out.println("0. Quitter");
+        System.out.print("Choix : ");
+        int choix = Integer.parseInt(scanner.nextLine());
+
+        switch (choix) {
+            case 1:
+                // Nouvelle recherche (continue la boucle)
+                break;
+            case 2:
+                // Revenir au menu principal
+                return;
+            case 0:
+                // Quitter le programme
+                System.out.println("Merci d'avoir utilisé BiblioTech. Au revoir !");
+                System.exit(0);
+            default:
+                System.out.println("Option invalide. Revenez au menu principal.");
+        }
+    }
+
+    private static void rechercherParISBN(Connection connection, Scanner scanner) {
+        System.out.print("Entrer ISBN : ");
+        String isbn = scanner.nextLine();
+
+        LivreController livreController = new LivreController(connection);
+        Livre livre = livreController.getLivreByISBN(isbn);
+
+        if (livre != null) {
+            System.out.println("Livre trouvé :");
+            System.out.println("Titre : " + livre.getTitre());
+            System.out.println("Auteur : " + livre.getAuteur());
+            System.out.println("ISBN : " + livre.getIsbn());
 
             System.out.println("Que souhaitez-vous faire ?");
-            System.out.println("1. Rechercher un livre");
-            System.out.println("2. Revenir au menu");
+            System.out.println("1. Modifier ce livre");
+            System.out.println("2. Supprimer ce livre");
+            System.out.println("3. Emprunter ce livre");
+            System.out.println("4. Retourner ce livre");
+            System.out.println("5. Nouvelle recherche");
+            System.out.println("6. Revenir au menu principal");
             System.out.println("0. Quitter");
             System.out.print("Choix : ");
             int choix = Integer.parseInt(scanner.nextLine());
 
             switch (choix) {
                 case 1:
-                    // Rechercher un livre (continue la boucle)
+                    System.out.print("Nouveau titre : ");
+                    String nouveauTitre = scanner.nextLine();
+                    System.out.print("Nouvel auteur : ");
+                    String nouvelAuteur = scanner.nextLine();
+
+                    boolean modificationReussie = livreController.modifierLivreParISBN(isbn, nouveauTitre, nouvelAuteur);
+
+                    if (modificationReussie) {
+                        System.out.println("Les informations du livre avec l'ISBN " + isbn + " ont été mises à jour avec succès.");
+                    } else {
+                        System.out.println("Échec de la mise à jour des informations du livre avec l'ISBN : " + isbn + ".");
+                    }
+                    break;
+                case 2:
+                    // Supprimer le livre
+                    System.out.print("Voulez-vous vraiment supprimer ce livre ? (O/N) : ");
+                    String confirmation = scanner.nextLine();
+
+                    if (confirmation.equalsIgnoreCase("O")) {
+                        boolean suppressionReussie = livreController.supprimerLivreParISBN(isbn);
+
+                        if (suppressionReussie) {
+                            System.out.println("Le livre avec l'ISBN " + isbn + " a été supprimé avec succès.");
+                        } else {
+                            System.out.println("Échec de la suppression du livre avec l'ISBN " + isbn + ".");
+                        }
+                    } else {
+                        System.out.println("Suppression annulée.");
+                    }
+
+                    break;
+                case 0:
+                    // Quitter le programme
+                    System.out.println("Merci d'avoir utilisé BiblioTech. Au revoir !");
+                    System.exit(0);
+                default:
+                    System.out.println("Option invalide. Revenez au menu principal.");
+            }
+        } else {
+            System.out.println("Aucun livre trouvé avec l'ISBN : " + isbn);
+            System.out.println("Que souhaitez-vous faire ?");
+            System.out.println("1. Nouvelle recherche");
+            System.out.println("2. Revenir au menu principal");
+            System.out.println("0. Quitter");
+            System.out.print("Choix : ");
+            int choix = Integer.parseInt(scanner.nextLine());
+
+            switch (choix) {
+                case 1:
+                    // Nouvelle recherche (continue la boucle)
                     break;
                 case 2:
                     // Revenir au menu principal
@@ -173,13 +285,14 @@ public class Bibliotech {
                     System.out.println("Option invalide. Revenez au menu principal.");
             }
         }
+
+
     }
 
+
     private static void emprunterLivre(Connection connection, Scanner scanner) {
-        // Implémentez l'emprunt de livre ici
     }
 
     private static void afficherStatistiques(Connection connection) {
-        // Implémentez l'affichage des statistiques ici
     }
 }
