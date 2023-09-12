@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class LivreController {
-    private Connection connection;
+    private final Connection connection;
     public LivreController(Connection connection) {
         this.connection = connection;
     }
@@ -123,5 +123,88 @@ public class LivreController {
 
         return resultats;
     }
+
+    public Livre getLivreByISBN(String isbn) {
+        try {
+            String query = "SELECT * FROM livre WHERE isbn = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, isbn);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                String titre = resultSet.getString("titre");
+                String auteur = resultSet.getString("auteur");
+                int quantite = resultSet.getInt("quantite");
+                Livre livre = new Livre(titre, auteur, isbn, quantite);
+                livre.setId(resultSet.getInt("id"));
+                return livre;
+            } else {
+                // Aucun livre trouvé avec cet ISBN
+                return null;
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la récupération du livre par ISBN : " + e.getMessage());
+            return null;
+        }
+    }
+
+    public boolean modifierLivreParISBN(String isbn, String nouveauTitre, String nouvelAuteur) {
+        try {
+            // Vérifier d'abord si le livre existe
+            Livre livre = getLivreByISBN(isbn);
+            if (livre == null) {
+                System.out.println("Aucun livre trouvé avec l'ISBN : " + isbn);
+                return false;
+            }
+
+            String updateQuery = "UPDATE livre SET titre = ?, auteur = ? WHERE isbn = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(updateQuery);
+            preparedStatement.setString(1, nouveauTitre);
+            preparedStatement.setString(2, nouvelAuteur);
+            preparedStatement.setString(3, isbn);
+
+            int rowCount = preparedStatement.executeUpdate();
+
+            return rowCount > 0;
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la modification du livre : " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean supprimerLivreParISBN(String isbn) {
+        try {
+            // Vérifier d'abord si le livre existe
+            Livre livre = getLivreByISBN(isbn);
+            if (livre == null) {
+                System.out.println("Aucun livre trouvé avec l'ISBN : " + isbn);
+                return false;
+            }
+
+            // Supprimer d'abord les copies associées à ce livre
+            String deleteCopiesQuery = "DELETE FROM copie WHERE livre_id = ?";
+            PreparedStatement deleteCopiesStatement = connection.prepareStatement(deleteCopiesQuery);
+            deleteCopiesStatement.setInt(1, livre.getId());
+            deleteCopiesStatement.executeUpdate();
+
+            // Ensuite, supprimer le livre
+            String deleteQuery = "DELETE FROM livre WHERE isbn = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery);
+            preparedStatement.setString(1, isbn);
+
+            int rowCount = preparedStatement.executeUpdate();
+
+            if (rowCount > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la suppression du livre : " + e.getMessage());
+            return false;
+        }
+    }
+
 
 }
